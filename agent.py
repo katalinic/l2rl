@@ -19,8 +19,7 @@ class BanditAgent(object):
         done = False
 
         while not done:
-            #adding self. to _probs to track training progress
-            #previous r will be task dependent
+            #previous r will be task dependent (task 3 has it one-hot)
             prev_r = np.array(r).reshape(1,1) if self.task != 3 else self._one_hot(bandit.t3_indexer([r]), self.number_of_actions+1)
             self._probs, _rnn_state = self.sess.run([self.net.probs, self.net.rnn_state], \
                 feed_dict = {self.net.prev_a_pl : [a], self.net.prev_r_pl : prev_r, self.net.init_rnn_state : _rnn_state})
@@ -62,7 +61,9 @@ class BanditAgent(object):
                 saver.save(self.sess, kwargs['model_directory']+'model.checkpoint',global_step=ep)
             #print training progress
             if ep%(num_episodes//20)==0:
-                print (all_actions[1:], self._probs[0,bandit.target_arm])
+                if bandit.task == 3 :
+                  print (all_actions[1:], self._probs[0,bandit.target_arm])
+                else: print (self._probs)
                 print ("Current Episode: {}, Training Completion: {}%".format(ep, 100*np.round(ep/num_episodes,2)))
 
     def test(self, bandit, test_eps, restore, **kwargs):
