@@ -9,7 +9,7 @@ tf.app.flags.DEFINE_boolean("training", False, "True for training, False for inf
 tf.app.flags.DEFINE_integer("task", 2, "Task index, 1-based")
 tf.app.flags.DEFINE_string("train_difficulty", 'easy', "Training difficulty for Task 2")
 tf.app.flags.DEFINE_string("test_difficulty", 'easy', "Testing difficulty for Task 2")
-tf.app.flags.DEFINE_float("learning_rate", 1e-4, "Learning rate")
+tf.app.flags.DEFINE_float("learning_rate", 1e-3, "Learning rate")
 tf.app.flags.DEFINE_float("gamma", 0.8, "Discount rate")
 tf.app.flags.DEFINE_integer("train_eps", 30000, "Task index")
 tf.app.flags.DEFINE_integer("test_eps", 150, "Task index")
