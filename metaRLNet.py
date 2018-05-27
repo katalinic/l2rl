@@ -9,7 +9,6 @@ class MetaRLNetwork(object):
         self.beta_v = beta_v
         global_step = tf.get_variable("global_step", [], tf.int32, initializer=tf.constant_initializer(0, dtype=tf.int32), trainable=False)
         self.global_step_increment = tf.assign_add(global_step, tf.constant(1, tf.int32))
-        # self.beta_e = tf.train.exponential_decay(1.0, global_step, int(number_of_episodes/200), decay_rate = 0.96) if beta_e == None else beta_e
         self.beta_e = tf.train.polynomial_decay(1.0, global_step, number_of_episodes, 0, power=1.) if beta_e == None else beta_e
         self._build_placeholders()
         self._build_network()
@@ -41,6 +40,5 @@ class MetaRLNetwork(object):
         sq = 0.5*tf.reduce_sum(tf.square(adv))
         entropy = -tf.reduce_sum(self.probs * tf.log(self.probs))
         loss = pg + self.beta_v*sq - self.beta_e*entropy
-        # optimiser = tf.train.RMSPropOptimizer(learning_rate = self.lr, decay=0.99, epsilon=0.1)
-        optimiser = tf.train.AdamOptimizer(learning_rate = self.lr)
+        optimiser = tf.train.RMSPropOptimizer(learning_rate = self.lr, decay=0.99)
         self.optimise = optimiser.minimize(loss)
