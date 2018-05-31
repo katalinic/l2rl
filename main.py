@@ -2,7 +2,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
 
-from bandits import Bandits
+from bandits import Indep, Corr2Arm, ElevenArm
 from agent import BanditAgent
 
 tf.app.flags.DEFINE_boolean("training", False, "True for training, False for inference")
@@ -21,14 +21,18 @@ model_directory = './models/task{}/'.format(FLAGS.task) if FLAGS.task!=2 \
 if not os.path.exists(model_directory):
     os.mkdir(model_directory)
 
-if FLAGS.training:
-    bandit = Bandits(task = FLAGS.task, difficulty = FLAGS.train_difficulty)
+if FLAGS.task == 1:
+    bandit = Indep(100)
+elif FLAGS.task == 2:
+    if FLAGS.training:
+        bandit = Corr2Arm(100, FLAGS.train_difficulty)
+    else: bandit = Corr2Arm(100, FLAGS.test_difficulty)
 else:
-    bandit = Bandits(task = FLAGS.task, difficulty = FLAGS.test_difficulty)
-
+    bandit = ElevenArm(5)
+    
 tf.reset_default_graph()
 sess = tf.Session()
-rlagent = BanditAgent(task = FLAGS.task, sess = sess, learning_rate = FLAGS.learning_rate, number_of_actions = bandit.number_of_actions, number_of_episodes = FLAGS.train_eps)
+rlagent = BanditAgent(task = FLAGS.task, sess = sess, learning_rate = FLAGS.learning_rate, number_of_actions = bandit.k, number_of_episodes = FLAGS.train_eps)
 sess.run(tf.global_variables_initializer())
 
 if FLAGS.training:
