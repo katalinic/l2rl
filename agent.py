@@ -61,7 +61,7 @@ class BanditAgent(object):
                 saver.save(self.sess, kwargs['model_directory']+'model.checkpoint',global_step=ep)
             #print training progress
             if ep%(num_episodes//20)==0:
-                if bandit.task == 3 :
+                if self.task == 3:
                   print (all_actions[1:], self._probs[0,bandit.target_arm])
                 else: print (self._probs)
                 print ("Current Episode: {}, Training Completion: {}%".format(ep, 100*np.round(ep/num_episodes,2)))
