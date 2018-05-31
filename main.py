@@ -36,7 +36,8 @@ rlagent = BanditAgent(task = FLAGS.task, sess = sess, learning_rate = FLAGS.lear
 sess.run(tf.global_variables_initializer())
 
 if FLAGS.training:
-    rlagent.train(bandit, FLAGS.train_eps, True, FLAGS.gamma, save_every=FLAGS.save_every, model_directory=model_directory)
+    rlagent.train(bandit = bandit, num_episodes = FLAGS.train_eps, gamma = FLAGS.gamma, save_progress = True, \
+                  save_every=FLAGS.save_every, model_directory=model_directory)
 else:
     avg_cumulative_regret = rlagent.test(bandit = bandit, test_eps = FLAGS.test_eps, restore = True, model_directory=model_directory)
     plt.plot(avg_cumulative_regret)
