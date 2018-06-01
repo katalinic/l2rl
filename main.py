@@ -16,8 +16,7 @@ tf.app.flags.DEFINE_integer("test_eps", 150, "Task index")
 tf.app.flags.DEFINE_integer("save_every", 2000, "Save model every x episodes")
 FLAGS = tf.app.flags.FLAGS
 
-model_directory = './models/task{}/'.format(FLAGS.task) if FLAGS.task!=2 \
-    else './models/task{}_{}_{}/'.format(FLAGS.task, FLAGS.train_difficulty, FLAGS.test_difficulty)
+model_directory = './models/task{}/'.format(FLAGS.task) if FLAGS.task!=2 else './models/task{}_{}/'.format(FLAGS.task, FLAGS.train_difficulty)
 if not os.path.exists(model_directory):
     os.mkdir(model_directory)
 
