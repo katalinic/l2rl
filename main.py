@@ -18,7 +18,8 @@ tf.app.flags.DEFINE_integer("test_eps", 150, "Task index")
 tf.app.flags.DEFINE_integer("save_every", 2000, "Save model every x episodes")
 FLAGS = tf.app.flags.FLAGS
 
-model_directory = './models/task{}/'.format(FLAGS.task) if FLAGS.task!=2 else './models/task{}_{}/'.format(FLAGS.task, FLAGS.train_difficulty)
+model_directory = './models/task{}/'.format(FLAGS.task) if FLAGS.task != 2 \
+    else './models/task{}_{}/'.format(FLAGS.task, FLAGS.train_difficulty)
 if not os.path.exists(model_directory):
     os.mkdir(model_directory)
 
@@ -33,14 +34,30 @@ elif FLAGS.task == 3:
 
 tf.reset_default_graph()
 sess = tf.Session()
-net = BanditNetwork(task = FLAGS.task, number_of_actions = bandit.k, learning_rate = FLAGS.learning_rate, \
-    number_of_episodes = FLAGS.train_eps, beta_e = None)
-rlagent = BanditAgent(task = FLAGS.task, number_of_actions = bandit.k, sess = sess, net = net)
+net = BanditNetwork(task=FLAGS.task,
+                    number_of_actions=bandit.k,
+                    learning_rate=FLAGS.learning_rate,
+                    number_of_episodes=FLAGS.train_eps,
+                    beta_e=None)
+
+rlagent = BanditAgent(task=FLAGS.task,
+                      number_of_actions=bandit.k,
+                      sess=sess,
+                      net=net)
+
 sess.run(tf.global_variables_initializer())
 
 if FLAGS.training:
-    rlagent.train(bandit = bandit, num_episodes = FLAGS.train_eps, gamma = FLAGS.gamma, save_progress = True, save_every=FLAGS.save_every, model_directory=model_directory)
+    rlagent.train(bandit=bandit,
+                  num_episodes=FLAGS.train_eps,
+                  gamma=FLAGS.gamma,
+                  save_progress=True,
+                  save_every=FLAGS.save_every,
+                  model_directory=model_directory)
 else:
-    avg_cumulative_regret = rlagent.test(bandit = bandit, test_eps = FLAGS.test_eps, restore = True, model_directory=model_directory)
+    avg_cumulative_regret = rlagent.test(bandit=bandit,
+                                         test_eps=FLAGS.test_eps,
+                                         restore=True,
+                                         model_directory=model_directory)
     plt.plot(avg_cumulative_regret)
     plt.show()
