@@ -11,7 +11,7 @@ class Bandit(object):
 
     def step(self):
         self.t += 1
-        self.done = True if self.t > self.T - 1 else False
+        self.done = bool(self.t > self.T - 1)
 
 
 class Indep(Bandit):
@@ -52,7 +52,7 @@ class Corr2Arm(Bandit):
         if self.difficulty == 'indep':
             self.outcome_probs = np.random.uniform(size=self.k)
         else:
-            self.outcome_probs = [p1, 1-p1]
+            self.outcome_probs = [p1, 1 - p1]
         self.rewards = np.ones(self.k)
 
     def step(self, action):
@@ -73,7 +73,7 @@ class ElevenArm(Bandit):
 
     def reset(self):
         super(ElevenArm, self).reset()
-        self.target_arm = np.random.choice(self.k-1)
+        self.target_arm = np.random.choice(self.k - 1)
         self.outcome_probs = np.ones(self.k)
         self.rewards = np.ones(self.k)
         self.rewards[self.target_arm] = 5

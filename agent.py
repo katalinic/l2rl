@@ -42,44 +42,39 @@ class BanditAgent(object):
         for r in all_rewards[1:][::-1]:
             R = r + gamma * R
             discounted_reward.append(R)
+        discounted_reward = discounted_reward[::-1]
         all_prev_r = np.array(all_rewards[:-1]).reshape(-1, 1) if self.task != 3 \
             else self._one_hot(bandit.t3_indexer(all_rewards[:-1]), self.number_of_actions + 1)
         fd = {
             self.net.prev_a_pl : all_actions[:-1],
             self.net.prev_r_pl : all_prev_r,
             self.net.target_a_pl : all_actions[1:],
-            self.net.value_pl : discounted_reward[::-1]}
+            self.net.value_pl : discounted_reward}
         self.sess.run([self.net.global_step_increment, self.net.optimise], feed_dict=fd)
 
-    def train(self, bandit, num_episodes, gamma, save_progress, **kwargs):
+    def train(self, bandit, num_episodes, gamma, model_directory):
         init_t = time.time()
-        if save_progress:
-            saver = tf.train.Saver(max_to_keep=5)
         for ep in range(num_episodes + 1):
             all_actions, all_rewards = self.trial_rollout(bandit, True)
             self.run_optimisation(all_actions, all_rewards, gamma, bandit)
-            if save_progress and (ep > 0) and (ep % kwargs['save_every'] == 0):
-                saver.save(self.sess, kwargs['model_directory'] + 'model.checkpoint',
-                           global_step=ep)
-            #print training progress
             if ep % (num_episodes // 10) == 0:
-                print("Current Episode: {}, Training Completion: {}%, Time Taken: {}, \
-                    Probs: {}".format(ep, 100*np.round(ep / num_episodes, 2),
-                                      np.round(time.time() - init_t, 2), self._probs[0]))
+                print("Training Completion: {:.2f}%, Time Taken: {:.2f}".format(
+                    100*(ep / num_episodes), time.time() - init_t))
                 init_t = time.time()
+        saver = tf.train.Saver()
+        saver.save(self.sess, model_directory + 'model.checkpoint')
 
-    def test(self, bandit, test_eps, restore, **kwargs):
-        if restore:
-            saver = tf.train.Saver()
-            chckpoint = tf.train.get_checkpoint_state(kwargs['model_directory'])
-            saver.restore(self.sess, chckpoint.model_checkpoint_path)
+    def test(self, bandit, test_eps, model_directory):
+        saver = tf.train.Saver()
+        chckpoint = tf.train.get_checkpoint_state(model_directory)
+        saver.restore(self.sess, chckpoint.model_checkpoint_path)
         cumulative_regret = []
         for _ in range(test_eps):
             all_actions = self.trial_rollout(bandit, False)
             #cumulative regret - assumes reward for positive outcomes, no penalty for negative
             opt_val = np.max(bandit.outcome_probs*bandit.rewards)
             all_actions_1h = self._one_hot(all_actions[1:], self.number_of_actions)
-            exp_reward = (all_actions_1h*bandit.outcome_probs).dot(bandit.rewards)
+            exp_reward = (all_actions_1h * bandit.outcome_probs).dot(bandit.rewards)
             regret = opt_val-exp_reward
             cumulative_regret.append(np.cumsum(regret))
         cumulative_regret = np.array(cumulative_regret)

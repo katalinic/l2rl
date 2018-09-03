@@ -5,28 +5,26 @@ class BanditNetwork(object):
             self,
             task,
             number_of_actions,
-            hidden_units=48,
-            learning_rate=1e-4,
-            beta_v=0.05,
-            beta_e=0.05,
-            number_of_episodes=2e4):
+            hidden_units,
+            learning_rate,
+            beta_v,
+            beta_e):
         self.task = task
         self.number_of_actions = number_of_actions
         self.hidden_units = hidden_units
         self.lr = learning_rate
         self.beta_v = beta_v
+        self.beta_e = beta_e
         global_step = tf.get_variable(
             "global_step", [], tf.int32, initializer=tf.constant_initializer(0, dtype=tf.int32),
             trainable=False)
         self.global_step_increment = tf.assign_add(global_step, tf.constant(1, tf.int32))
-        self.beta_e = tf.train.polynomial_decay(1.0, global_step, number_of_episodes, 0, power=1.) \
-            if beta_e is None else beta_e
         self._build_placeholders()
         self._build_network()
         self._build_optimisation()
 
     def _build_placeholders(self):
-        self.prev_r_pl = tf.placeholder(tf.float32, [None, self.number_of_actions+1]) \
+        self.prev_r_pl = tf.placeholder(tf.float32, [None, self.number_of_actions + 1]) \
             if self.task == 3 else tf.placeholder(tf.float32, [None, 1])
         self.value_pl = tf.placeholder(tf.float32, [None])
         self.prev_a_pl = tf.placeholder(tf.int32, [None])
