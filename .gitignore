@@ -1,0 +1,5 @@
+.DS_Store
+/figures
+bandit_2arm_transfer.py
+bandit_figure.py
+gittins_exp.py
