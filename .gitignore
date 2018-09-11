@@ -1,10 +1,2 @@
 .DS_Store
 __pycache__
-/figures
-bandit_2arm_transfer.py
-bandit_figure.py
-gittins_exp.py
-agent.py
-main.py
-network.py
-bandits.py
