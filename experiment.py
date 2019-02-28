@@ -63,7 +63,7 @@ def base():
     cell_init = cell.zero_state(1, dtype=tf.float32)  # Batch size hardcoded as 1.
     cell_init_c, cell_init_h = tf.unstack(cell_init)  # Nesting workaround.
 
-    cell_input = tf.concat([prev_action_one_hot, prev_reward, cell_init_h], axis=1)
+    cell_input = tf.concat([prev_action_one_hot, prev_reward], axis=1)
 
     # Dummy agent logits for initialisation.
     dummy_logits = tf.zeros([1, FLAGS.num_actions], tf.float32)
@@ -88,7 +88,7 @@ def torso(bandit, cell, step_init):
         new_a = tf.multinomial(logits_, num_samples=1, output_dtype=tf.int32)[0]
         new_a = tf.one_hot(new_a, depth=FLAGS.num_actions, axis=1)
 
-        new_concat = tf.concat([new_a, new_r, new_h], axis=1)
+        new_concat = tf.concat([new_a, new_r], axis=1)
         return new_concat, new_c, new_h, logits_
 
     with tf.control_dependencies([bandit.reset()]):
