@@ -1,5 +1,9 @@
+from collections import namedtuple
+
 import tensorflow as tf
 import numpy as np
+
+EnvOutput = namedtuple('EnvOutput', 'reward')
 
 
 class TFBandit(object):
@@ -18,7 +22,7 @@ class TFBandit(object):
         p1 = tf.gather_nd(possible_arm_probs, idx)
         p1 = tf.squeeze(p1)
         with tf.control_dependencies([self._p1.assign(p1)]):
-            return tf.zeros(1)
+            return EnvOutput(tf.zeros(1))
 
     def step(self, action):
         logprobs = tf.log([self._p1, 1 - self._p1])
@@ -27,7 +31,7 @@ class TFBandit(object):
             logprobs, num_samples=1, output_dtype=tf.int32)[0]
         reward = tf.equal(action, sample)
         reward = tf.to_float(reward)
-        return reward
+        return EnvOutput(reward)
 
     @property
     def p1(self):
