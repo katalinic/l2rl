@@ -39,23 +39,13 @@ class Worker:
 
     def evaluate(self, sess):
         print('Testing.')
-
-        def _one_hot(x):
-            # Assuming two actions.
-            num_rows = x.shape[0]
-            zeros = np.zeros((num_rows, 2))
-            zeros[np.arange(num_rows), x] = 1
-            return zeros
-
         episodic_regret = []
         for _ in range(self.constants.test_eps):
-            env_outputs, _, agent_outputs = sess.run(self.rollout_outputs)
-            actions = _one_hot(agent_outputs.action)
+            _, _, agent_outputs = sess.run(self.rollout_outputs)
             p1 = sess.run(self.env.p1)
-            opt_val = np.max([p1, 1 - p1])
-            exp_reward = (actions * [p1, 1 - p1]).dot([1., 1.])
-            regret = opt_val - exp_reward
-            episodic_regret.append(np.cumsum(regret))
+            regret = self.env.calculate_cumulative_regret(
+                agent_outputs.action, p1, self.action_space)
+            episodic_regret.append(regret)
         episodic_regret = np.array(episodic_regret)
         avg_cumulative_regret = np.mean(episodic_regret, axis=0)
         print(avg_cumulative_regret[-1])

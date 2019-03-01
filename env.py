@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 class TFBandit(object):
@@ -31,3 +32,18 @@ class TFBandit(object):
     @property
     def p1(self):
         return self._p1
+
+    @staticmethod
+    def calculate_cumulative_regret(actions, p1, action_space):
+        actions = one_hot(actions, action_space)
+        opt_val = np.max([p1, 1 - p1])
+        exp_reward = (actions * [p1, 1 - p1]).dot([1., 1.])
+        regret = opt_val - exp_reward
+        return np.cumsum(regret)
+
+
+def one_hot(input_, depth):
+    num_rows = input_.shape[0]
+    zeros = np.zeros((num_rows, depth))
+    zeros[np.arange(num_rows), input_] = 1
+    return zeros
